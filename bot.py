@@ -147,6 +147,9 @@ class ModBot(discord.Client):
     def useless_function1(self, text):
         return False
 
+    def useless_function_yang(self, text):
+        return True
+
 
 client = ModBot(perspective_key)
 client.run(discord_token)
