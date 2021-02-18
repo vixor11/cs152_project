@@ -2,22 +2,26 @@ from enum import Enum, auto
 import discord
 import re
 
+
 class State(Enum):
     REPORT_START = auto()
     AWAITING_MESSAGE = auto()
     MESSAGE_IDENTIFIED = auto()
     REPORT_COMPLETE = auto()
 
+
 class Report:
     START_KEYWORD = "report"
     CANCEL_KEYWORD = "cancel"
     HELP_KEYWORD = "help"
+    SOMEONE_AT_RISK = "someone is at risk"
+    ENCOURAGES_SUICIDE = "encourages suicide"
 
     def __init__(self, client):
         self.state = State.REPORT_START
         self.client = client
         self.message = None
-    
+
     async def handle_message(self, message):
         '''
         This function makes up the meat of the user-side reporting flow. It defines how we transition between states and what 
@@ -28,15 +32,15 @@ class Report:
         if message.content == self.CANCEL_KEYWORD:
             self.state = State.REPORT_COMPLETE
             return ["Report cancelled."]
-        
+
         if self.state == State.REPORT_START:
-            reply =  "Thank you for starting the reporting process. "
+            reply = "Thank you for starting the reporting process. "
             reply += "Say `help` at any time for more information.\n\n"
             reply += "Please copy paste the link to the message you want to report.\n"
             reply += "You can obtain this link by right-clicking the message and clicking `Copy Message Link`."
             self.state = State.AWAITING_MESSAGE
             return [reply]
-        
+
         if self.state == State.AWAITING_MESSAGE:
             # Parse out the three ID strings from the message link
             m = re.search('/(\d+)/(\d+)/(\d+)', message.content)
@@ -55,18 +59,17 @@ class Report:
 
             # Here we've found the message - it's up to you to decide what to do next!
             self.state = State.MESSAGE_IDENTIFIED
-            return ["I found this message:", "```" + message.author.name + ": " + message.content + "```", \
-                    "This is all I know how to do right now - it's up to you to build out the rest of my reporting flow!"]
-        
+            print(self.state)
+            return ["I found this message:", "```" + message.author.name + ": " + message.content + "```"]
+
         if self.state == State.MESSAGE_IDENTIFIED:
+            print(66)
             return ["<insert rest of reporting flow here>"]
 
         return []
 
     def report_complete(self):
         return self.state == State.REPORT_COMPLETE
-    
 
 
-    
-
+# Who is this content harming? If it just generally encourages suicide, type @Group 8 Bot#6841 , if not, @ the user that you think is negatively affected.

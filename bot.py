@@ -17,7 +17,7 @@ handler.setFormatter(logging.Formatter(
     '%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
 
-# There should be a file called 'token.json' inside the same folder as this file
+# There should be a file called 'tokens.json' inside the same folder as this file
 token_path = 'tokens.json'
 if not os.path.isfile(token_path):
     raise Exception(f"{token_path} not found!")
@@ -140,15 +140,6 @@ class ModBot(discord.Client):
 
     def code_format(self, text):
         return "```" + text + "```"
-
-    def useless_function(self, text):
-        return False
-
-    def useless_function1(self, text):
-        return False
-
-    def useless_function_yang(self, text):
-        return True
 
 
 client = ModBot(perspective_key)
