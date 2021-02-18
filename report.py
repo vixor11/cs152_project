@@ -5,8 +5,12 @@ import re
 
 class State(Enum):
     REPORT_START = auto()
-    AWAITING_MESSAGE = auto()
+    AWAITING_LINK = auto()
+    AWAITING_YES = auto()
     MESSAGE_IDENTIFIED = auto()
+    SOMEONE_AT_RISK = auto()
+    ENCOURAGES_SUICIDE = auto()
+    USER_IDENTIFIED = auto()
     REPORT_COMPLETE = auto()
 
 
@@ -14,8 +18,10 @@ class Report:
     START_KEYWORD = "report"
     CANCEL_KEYWORD = "cancel"
     HELP_KEYWORD = "help"
-    SOMEONE_AT_RISK = "someone is at risk"
-    ENCOURAGES_SUICIDE = "encourages suicide"
+    YES_KEYWORD = "yes"
+    NO_KEYWORD = "no"
+    RISK_KEYWORD = "someone is at risk"
+    SUICIDE_KEYWORD = "encourages suicide"
 
     def __init__(self, client):
         self.state = State.REPORT_START
@@ -24,9 +30,9 @@ class Report:
 
     async def handle_message(self, message):
         '''
-        This function makes up the meat of the user-side reporting flow. It defines how we transition between states and what 
+        This function makes up the meat of the user-side reporting flow. It defines how we transition between states and what
         prompts to offer at each of those states. You're welcome to change anything you want; this skeleton is just here to
-        get you started and give you a model for working with Discord. 
+        get you started and give you a model for working with Discord.
         '''
 
         if message.content == self.CANCEL_KEYWORD:
@@ -38,10 +44,10 @@ class Report:
             reply += "Say `help` at any time for more information.\n\n"
             reply += "Please copy paste the link to the message you want to report.\n"
             reply += "You can obtain this link by right-clicking the message and clicking `Copy Message Link`."
-            self.state = State.AWAITING_MESSAGE
+            self.state = State.AWAITING_LINK
             return [reply]
 
-        if self.state == State.AWAITING_MESSAGE:
+        if self.state == State.AWAITING_LINK:
             # Parse out the three ID strings from the message link
             m = re.search('/(\d+)/(\d+)/(\d+)', message.content)
             if not m:
@@ -58,13 +64,37 @@ class Report:
                 return ["It seems this message was deleted or never existed. Please try again or say `cancel` to cancel."]
 
             # Here we've found the message - it's up to you to decide what to do next!
-            self.state = State.MESSAGE_IDENTIFIED
-            print(self.state)
-            return ["I found this message:", "```" + message.author.name + ": " + message.content + "```"]
+            self.state = State.AWAITING_YES
+            return ["I found this message:", "```" + message.author.name + ": " + message.content + "```",
+                    "Is this the message you are reporting for suicidal content? Type `yes` to confirm or `no` if you'd like to report a different message."]
+
+        if self.state == State.AWAITING_YES:
+            if message.content == self.YES_KEYWORD:
+                self.state = State.MESSAGE_IDENTIFIED
+                return ["Your message has been identified.\n Type `someone is at risk` if you believe someone is at risk.\n If this is content that generally encourages suicide, type `encourages suicide`."]
+            if message.content == self.NO_KEYWORD:
+                self.state = State.AWAITING_LINK
+                reply = "Uh oh! To find the message to report, right click the message and click `Copy Message Link`.\n"
+                return [reply]
 
         if self.state == State.MESSAGE_IDENTIFIED:
-            print(66)
-            return ["<insert rest of reporting flow here>"]
+            if message.content == self.SUICIDE_KEYWORD:
+                self.state == State.REPORT_COMPLETE
+                reply = "Thank you for reporting this message!\n"
+                reply += "If you know anyone who might be negatively affected by viewing content like this, you should encourage them to report this message as well."
+                return [reply]
+            if message.content == self.RISK_KEYWORD:
+                self.state == State.USER_IDENTIFIED
+                reply = "Please tell us who you think is put at risk by this message.\n"
+                reply += "It could be that they are expressing interest in committing suicide, or that someone else is encouraging them to do so, or you just generally think they are unwell."
+                reply += "Type their username and hash below with the following format: `sample_user #0000`."
+                return [reply]
+
+        if self.state == State.USER_IDENTIFIED:
+            self.state == State.REPORT_COMPLETE
+            reply = "Thank you for reporting this message!\n"
+            reply += "Your actions help keep our community safe."
+            return [reply]
 
         return []
 
