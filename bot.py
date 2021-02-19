@@ -10,6 +10,9 @@ from report import Report
 
 # Message class
 
+messages = []
+users = []
+
 
 class Message:
     def __init__(self, priority, url, message_content, report_percentage, algorithm_flag, date_time):
@@ -129,11 +132,17 @@ class ModBot(discord.Client):
         if not message.channel.name == f'group-{self.group_num}':
             return
 
+        scores = self.eval_text(message)
+
+        if scores
+
+        if message not in messages:
+            messages.append()
+
         # Forward the message to the mod channel
         mod_channel = self.mod_channels[message.guild.id]
         await mod_channel.send(f'Forwarded message:\n{message.author.name}: "{message.content}"')
 
-        scores = self.eval_text(message)
         await mod_channel.send(self.code_format(json.dumps(scores, indent=2)))
 
     def eval_text(self, message):
