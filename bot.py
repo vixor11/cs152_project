@@ -8,6 +8,30 @@ import re
 import requests
 from report import Report
 
+# Message class
+
+
+class Message:
+    def __init__(self, priority, url, message_content, report_percentage, algorithm_flag, date_time):
+        self.priority = priority
+        self.url = url
+        self.message_content = message_content
+        self.report_percentage = report_percentage
+        self.algorithm_flag = algorithm_flag
+        self.date_time = date_time
+
+# User class
+
+
+class User:
+    def __init__(self, username, hash_number, victim_score, perpetrator_score, reporter_score):
+        self.username = username
+        self.hash_number = hash_number
+        self.victim_score = victim_score
+        self.perpetrator_score = perpetrator_score
+        self.reporter_score = reporter_score
+
+
 # Set up logging to the console
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
